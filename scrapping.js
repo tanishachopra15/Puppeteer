@@ -24,26 +24,14 @@ const main = async () => {
     await page.goto(url);
     await page.waitForSelector(selector);
 
-    //  await page.evaluate(() => {
-    //     window.scrollTo(0, document.body.scrollHeight);
-    //   });
+     await page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+      });
 
     // await page.screenshot({
     //     path: `./scrapingbee_homepage.jpg`,
     //     fullPage: true
     // });
-
-    // const element = await page.$(selector);
-
-    // if (element) {
-    //     // Take a screenshot of the specific element
-    //     await element.screenshot({
-    //         path: `./specific-element.png`
-    //     });
-    //     console.log('Screenshot of the selector saved as specific-element.png');
-    // } else {
-    //     console.log('Element not found');
-    // }
 
     let elements = await page.$$(selector);
     console.log(elements.length);
@@ -57,7 +45,7 @@ const main = async () => {
 
             properties.push(link)
             console.log(properties.length);
-            console.log(link);
+            // console.log(link);
 
         } catch (error) {
             console.log(error);
@@ -73,14 +61,17 @@ const main = async () => {
 
             const select = ".x9f619.x1n2onr6.x1ja2u2z > div";
             const element = await page.waitForSelector(select);
+            const loc_selector = '.x78zum5.xdt5ytf.x1iyjqo2.x1n2onr6 > .x1xmf6yo > div.xwib8y2'
+            const desc_selector = '.x78zum5 > div.xod5an3 div.x1gslohp'
+            const desc = await page.$eval(desc_selector, data => data.textContent.replaceAll('\n', ''));
+            const items_location = await page.$$eval(loc_selector, data => data.map(data => data.textContent));
+
             const items = {
                 image: await page.$eval('div > img', data => data.src),
                 title: await page.$eval('div > div > h1 > span', data => data.textContent),
                 price: await page.$eval('.x1anpbxc > span', data => data.textContent),
-                location: await page.$eval('.xjyslct.xjbqb8w.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1rg5ohu.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.x16tdsg8.xh8yej3 > div', data => data.textContent),
-                // listed_on: await page.$eval('.x1xmf6yo div:nth-of-type(2) .x9f619 span.xo1l8bm6', data => data.textContent),
-                // description: await page.$eval('.x78zum5 > div.xwib8y2 div:nth-of-type(2) .x9f619 span', data => data.textContent), 
-                description: await page.$eval('.x78zum5 > div.xwib8y2 div:nth-of-type(2) .x9f619 span', data => data.textContent), 
+                item_locator: items_location,
+                description: desc,
             }
             console.log(items);
         } catch (error) {
