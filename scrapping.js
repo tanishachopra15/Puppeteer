@@ -1,6 +1,6 @@
 import puppeteer from "puppeteer";
-import fs, { link } from 'fs';
-import { title } from "process";
+import fs from 'fs';
+import { parse } from 'json2csv';
 
 const main = async () => {
     const browser = await puppeteer.launch({
@@ -53,6 +53,8 @@ const main = async () => {
         }
     }
 
+    let scrapped_data = [];
+
     for (const elements of properties) {
         await page.goto(elements, {
             waitUntil: "networkidle2",
@@ -75,7 +77,7 @@ const main = async () => {
             await seeMoreButton.click();
             let desc = await page.$eval(desc_selector, (data) => data.textContent.replaceAll('\n', ''));
             desc = desc.substring(0, desc.length - 9);
-           
+
             const items = {
                 image: await page.$eval('div > img', data => data.src),
                 title: await page.$eval('div > div > h1 > span', data => data.textContent),
@@ -83,12 +85,25 @@ const main = async () => {
                 location_info: items_location,
                 description: desc,
             }
+
+            scrapped_data.push(items);
             console.log(items);
         } catch (error) {
             console.log(error);
             continue;
         }
     }
+
+    const fields = ["image", "title", "price", "location_info", "description"];
+
+    try {
+        const csv = parse(scrapped_data, { fields });
+        fs.writeFileSync("scraped_data.csv", csv);
+        console.log("Data saved to scraped_data.csv");
+    } catch (error) {
+        console.error("Error saving data to CSV:", error);
+    }
+
     await browser.close();
 
 }
