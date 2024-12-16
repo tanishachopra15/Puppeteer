@@ -24,9 +24,9 @@ const main = async () => {
     await page.goto(url);
     await page.waitForSelector(selector);
 
-     await page.evaluate(() => {
+    await page.evaluate(() => {
         window.scrollTo(0, document.body.scrollHeight);
-      });
+    });
 
     // await page.screenshot({
     //     path: `./scrapingbee_homepage.jpg`,
@@ -48,7 +48,8 @@ const main = async () => {
             // console.log(link);
 
         } catch (error) {
-            console.log(error);
+            // console.log(error);
+            continue;
         }
     }
 
@@ -62,23 +63,34 @@ const main = async () => {
             const select = ".x9f619.x1n2onr6.x1ja2u2z > div";
             const element = await page.waitForSelector(select);
             const loc_selector = '.x78zum5.xdt5ytf.x1iyjqo2.x1n2onr6 > .x1xmf6yo > div.xwib8y2'
+            const items_location = await page.$eval(loc_selector, data => data.textContent);
             const desc_selector = '.x78zum5 > div.xod5an3 div.x1gslohp'
-            const desc = await page.$eval(desc_selector, data => data.textContent.replaceAll('\n', ''));
-            const items_location = await page.$$eval(loc_selector, data => data.map(data => data.textContent));
 
+            const seeMoreXPath =
+                "//span[contains(text(),'See more')]";
+
+            const seeMoreButton = await page.waitForSelector(`xpath/${seeMoreXPath}`);
+            const button = await page.$eval(`xpath/${seeMoreXPath}`, data => data.textContent);
+            console.log(button);
+            await seeMoreButton.click();
+            let desc = await page.$eval(desc_selector, (data) => data.textContent.replaceAll('\n', ''));
+            desc = desc.substring(0, desc.length - 9);
+           
             const items = {
                 image: await page.$eval('div > img', data => data.src),
                 title: await page.$eval('div > div > h1 > span', data => data.textContent),
                 price: await page.$eval('.x1anpbxc > span', data => data.textContent),
-                item_locator: items_location,
+                location_info: items_location,
                 description: desc,
             }
             console.log(items);
         } catch (error) {
             console.log(error);
+            continue;
         }
     }
-    // await browser.close();
+    await browser.close();
+
 }
 
 main();
