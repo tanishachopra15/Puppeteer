@@ -48,8 +48,8 @@ const main = async () => {
             // console.log(link);
 
         } catch (error) {
-            // console.log(error);
-            continue;
+            console.log(error);
+            // continue;
         }
     }
 
@@ -84,27 +84,34 @@ const main = async () => {
                 price: await page.$eval('.x1anpbxc > span', data => data.textContent),
                 location_info: items_location,
                 description: desc,
+                coordinates: await page.$eval('.x1lq5wgf.xgqcy7u.x30kzoy.x9jhf4c.x6ikm8r.x10wlt62.x1n2onr6 > div > div > div', data => {
+                    const backgroundImage = getComputedStyle(data).getPropertyValue('background-image');
+                    const url = backgroundImage.slice(5, -2);
+                    const queryParams = new URL(url).searchParams;
+                    const coords = queryParams.get('center');
+                    return coords;
+                }),
             }
 
             scrapped_data.push(items);
             console.log(items);
         } catch (error) {
             console.log(error);
-            continue;
+            // continue;
         }
     }
 
-    const fields = ["image", "title", "price", "location_info", "description"];
+    // const fields = ["image", "title", "price", "location_info", "description", "coordinates"];
 
-    try {
-        const csv = parse(scrapped_data, { fields });
-        fs.writeFileSync("scraped_data.csv", csv);
-        console.log("Data saved to scraped_data.csv");
-    } catch (error) {
-        console.error("Error saving data to CSV:", error);
-    }
+    // try {
+    //     const csv = parse(scrapped_data, { fields });
+    //     fs.writeFileSync("scraped_data.csv", csv);
+    //     console.log("Data saved to scraped_data.csv");
+    // } catch (error) {
+    //     console.error("Error saving data to CSV:", error);
+    // }
 
-    await browser.close();
+    // await browser.close();
 
 }
 
