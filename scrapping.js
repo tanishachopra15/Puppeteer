@@ -75,7 +75,7 @@ const main = async () => {
                 await seeMoreButton.click();
             }
             let desc = await page.$eval(desc_selector, (data) => data.textContent.replaceAll('\n', ''));
-            desc = desc.substring(0, desc.length - 9);
+            desc = seeMoreButton ? desc.substring(0, desc.length - 9) : desc;
 
             const items = {
                 image: await page.$eval('div > img', data => data.src),
