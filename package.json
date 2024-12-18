@@ -10,6 +10,7 @@
   "description": "",
   "type": "module",
   "dependencies": {
+    "cookie": "^1.0.2",
     "fs": "^0.0.1-security",
     "json2csv": "^6.0.0-alpha.2",
     "puppeteer": "^23.10.4"

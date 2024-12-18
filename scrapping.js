@@ -25,23 +25,15 @@ const main = async () => {
     await page.waitForSelector(selector);
     await page.evaluate(() => document.body.style.zoom = 0.1);
 
-
-    await page.evaluate(() => {
-        window.scrollTo(0, document.body.scrollHeight);
-    });
-    await new Promise(resolve => setTimeout(resolve, 20000));
-    await page.evaluate(() => {
-        window.scrollTo(0, document.body.scrollHeight);
-    });
- 
-
-    // await page.screenshot({
-    //     path: `./scrapingbee_homepage.jpg`,
-    //     fullPage: true
-    // });
-
     let elements = await page.$$(selector);
-    console.log(elements.length);
+    while (elements.length < 40) {
+        console.log(`Current element count: ${elements.length}`);
+        await new Promise(resolve => setTimeout(resolve, 10000));
+        elements = await page.$$(selector);
+    }
+    elements = elements.slice(0, 30);
+    console.log(`Collected exactly 30 elements.`);
+
 
     let properties = [];
 
@@ -78,10 +70,10 @@ const main = async () => {
             const seeMoreXPath =
                 "//span[contains(text(),'See more')]";
 
-            const seeMoreButton = await page.waitForSelector(`xpath/${seeMoreXPath}`);
-            const button = await page.$eval(`xpath/${seeMoreXPath}`, data => data.textContent);
-            console.log(button);
-            await seeMoreButton.click();
+            const seeMoreButton = await page.$(`xpath/${seeMoreXPath}`);
+            if (seeMoreButton) {
+                await seeMoreButton.click();
+            }
             let desc = await page.$eval(desc_selector, (data) => data.textContent.replaceAll('\n', ''));
             desc = desc.substring(0, desc.length - 9);
 
@@ -118,7 +110,7 @@ const main = async () => {
         console.error("Error saving data to CSV:", error);
     }
 
-    // await browser.close();
+    await browser.close();
 
 }
 
