@@ -23,10 +23,17 @@ const main = async () => {
 
     await page.goto(url);
     await page.waitForSelector(selector);
+    await page.evaluate(() => document.body.style.zoom = 0.1);
+
 
     await page.evaluate(() => {
         window.scrollTo(0, document.body.scrollHeight);
     });
+    await new Promise(resolve => setTimeout(resolve, 20000));
+    await page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+ 
 
     // await page.screenshot({
     //     path: `./scrapingbee_homepage.jpg`,
@@ -101,15 +108,15 @@ const main = async () => {
         }
     }
 
-    // const fields = ["image", "title", "price", "location_info", "description", "coordinates"];
+    const fields = ["image", "title", "price", "location_info", "description", "coordinates"];
 
-    // try {
-    //     const csv = parse(scrapped_data, { fields });
-    //     fs.writeFileSync("scraped_data.csv", csv);
-    //     console.log("Data saved to scraped_data.csv");
-    // } catch (error) {
-    //     console.error("Error saving data to CSV:", error);
-    // }
+    try {
+        const csv = parse(scrapped_data, { fields });
+        fs.writeFileSync("scraped_data.csv", csv);
+        console.log("Data saved to scraped_data.csv");
+    } catch (error) {
+        console.error("Error saving data to CSV:", error);
+    }
 
     // await browser.close();
 
