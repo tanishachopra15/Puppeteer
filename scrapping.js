@@ -52,6 +52,8 @@ const main = async () => {
         }
     }
 
+    // properties = properties.slice(0, 10);
+
     let scrapped_data = [];
 
     for (const elements of properties) {
@@ -63,9 +65,19 @@ const main = async () => {
 
             const select = ".x9f619.x1n2onr6.x1ja2u2z > div";
             const element = await page.waitForSelector(select);
-            const loc_selector = '.x78zum5.xdt5ytf.x1iyjqo2.x1n2onr6 > .x1xmf6yo > div.xwib8y2'
-            const items_location = await page.$eval(loc_selector, data => data.textContent);
-            const desc_selector = '.x78zum5 > div.xod5an3 div.x1gslohp'
+            // const items_location = loc_selector ? await page.$$eval(loc_selector, els => els.map(el => el.textContent.trim())
+            // ) : null;
+            const items_location = await page.evaluate(() => {
+                const loc_selector = '.x78zum5.xdt5ytf.x1iyjqo2.x1n2onr6 > .x1xmf6yo > div.xwib8y2';
+                const elements = document.querySelector(loc_selector);
+
+                // Extract text content from each element and return as an array
+                return elements ? Array.from(elements.children).map(el => el.textContent.trim()) : null;
+            });
+
+            console.log(items_location);
+
+            const desc_selector = '.x78zum5 > div.xod5an3 div.x1gslohp';
 
             const seeMoreXPath =
                 "//span[contains(text(),'See more')]";
@@ -110,7 +122,7 @@ const main = async () => {
         console.error("Error saving data to CSV:", error);
     }
 
-    await browser.close();
+    // await browser.close();
 
 }
 

@@ -11,7 +11,7 @@ import { parse } from 'json2csv';
         timeout: 120000,
         maxConcurrency: 30,
         puppeteerOptions: {
-            headless: false,
+            headless: true,
             defaultViewport: false,
         },
     });
@@ -78,19 +78,27 @@ import { parse } from 'json2csv';
 
             const select = ".x9f619.x1n2onr6.x1ja2u2z > div";
             const element = await page.waitForSelector(select);
+            const items_location = await page.evaluate(() => {
+                const locSelector = '.x78zum5.xdt5ytf.x1iyjqo2.x1n2onr6 > .x1xmf6yo > div.xwib8y2';
+                const elements = document.querySelectorAll(locSelector);
 
-            const loc_selector = '.x78zum5.xdt5ytf.x1iyjqo2.x1n2onr6 > .x1xmf6yo > div.xwib8y2'
-            const items_location = await page.$eval(loc_selector, data => data.textContent);
-            const desc_selector = '.x78zum5 > div.xod5an3 div.x1gslohp'
+                return Array.from(elements).map(element => {
+                    const location = element.children[0]?.textContent?.trim() || null;
+                    const sq_feet = element.textContent.includes('feet') ? element.children[1]?.textContent?.trim() : null;
+                    const pet_friendly = element.textContent.includes('friendly');
+                    const listed_on = element.lastElementChild.textContent?.trim().split('·')[0];
+                    const available_on = element.lastElementChild?.textContent?.trim().split('·')[1] || null;
+                    return {
+                        location: location,
+                        sq_feet: sq_feet,
+                        pet_friendly: pet_friendly,
+                        listed_on: listed_on,
+                        available_on: available_on
+                    };
+                });
+            });
 
-
-            // const closePopupXPath = '//*[@id="mount_0_0_Ix"]/div/div[1]/div/div[5]/div/div/div[1]/div/div[2]/div/div/div/div[1]';
-            // const closePopupXPath = '//*[@id="mount_0_0_A1"]/div/div[1]/div/div[5]/div/div/div[1]/div/div[2]/div/div/div/div[1]';
-            // const closePopup = await page.$(`xpath/${closePopupXPath}`);
-            // if (closePopup) {
-            //     await closePopup.click();
-            // }
-            // await new Promise(resolve => setTimeout(resolve, 5000));
+            const desc_selector = '.x78zum5 > div.xod5an3 div.x1gslohp';
 
             page.keyboard.down("Shift")
             page.keyboard.press("Tab")
@@ -105,15 +113,15 @@ import { parse } from 'json2csv';
                 await seeMoreButton.click();
             }
 
-            let desc = await page.$eval(desc_selector, (data) => data.textContent.replaceAll('\n', ''));
-            desc = seeMoreButton ? desc.substring(0, desc.length - 9) : desc;
+            let desc = await page.$eval(desc_selector, (data) => data.textContent.replace(/\n/g, ''));
+            const description = seeMoreButton ? desc.substring(0, desc.length - 9) : desc;
 
             const items = {
                 image: await page.$eval('div > img', data => data.src),
                 title: await page.$eval('div > div > h1 > span', data => data.textContent),
                 price: await page.$eval('.x1anpbxc > span', data => data.textContent),
                 location_info: items_location,
-                description: desc,
+                description: description,
                 coordinates: await page.$eval('.x1lq5wgf.xgqcy7u.x30kzoy.x9jhf4c.x6ikm8r.x10wlt62.x1n2onr6 > div > div > div', data => {
                     const backgroundImage = getComputedStyle(data).getPropertyValue('background-image');
                     const url = backgroundImage.slice(5, -2);
