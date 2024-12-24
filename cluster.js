@@ -76,7 +76,7 @@ import { parse } from 'json2csv';
         });
         try {
             const select = ".x9f619.x1n2onr6.x1ja2u2z > div";
-            const element = await page.waitForSelector(select);
+            // const element = await page.waitForSelector(select);
             const items_location = await page.evaluate(() => {
                 const locSelector = '.x78zum5.xdt5ytf.x1iyjqo2.x1n2onr6 > .x1xmf6yo > div.xwib8y2';
                 const elements = document.querySelectorAll(locSelector);
@@ -101,17 +101,20 @@ import { parse } from 'json2csv';
             page.keyboard.press("Tab")
             page.keyboard.up("Shift")
             page.keyboard.press("Enter")
-            
+
             const desc_selector = '.x78zum5 > div.xod5an3 div.x1gslohp';
             const seeMoreXPath =
                 "//span[contains(text(),'See more')]/parent::div";
 
             const seeMoreButton = await page.$(`xpath/${seeMoreXPath}`);
             if (seeMoreButton) {
-                await seeMoreButton.click();
+                await page.evaluate((e) => {
+                    e.click()
+                  }, seeMoreButton);
+                // await seeMoreButton.click();
             }
 
-            await page.waitForSelector(desc_selector,{
+            await page.waitForSelector(desc_selector, {
                 timeout: 1200000
             });
             let desc = await page.$eval(desc_selector, (data) => data.textContent.replace(/\n/g, ''));
@@ -122,7 +125,7 @@ import { parse } from 'json2csv';
                 title: await page.$eval('div > div > h1 > span', data => data.textContent),
                 price: await page.$eval('.x1anpbxc > span', data => data.textContent),
                 location_info: items_location,
-                description: description,
+                description: description ? description : null,
                 coordinates: await page.$eval('.x1lq5wgf.xgqcy7u.x30kzoy.x9jhf4c.x6ikm8r.x10wlt62.x1n2onr6 > div > div > div', data => {
                     const backgroundImage = getComputedStyle(data).getPropertyValue('background-image');
                     const url = backgroundImage.slice(5, -2);
