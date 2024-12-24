@@ -11,7 +11,7 @@ import { parse } from 'json2csv';
         timeout: 120000,
         maxConcurrency: 30,
         puppeteerOptions: {
-            headless: true,
+            headless: false,
             defaultViewport: false,
         },
     });
@@ -75,7 +75,6 @@ import { parse } from 'json2csv';
             timeout: 120000,
         });
         try {
-
             const select = ".x9f619.x1n2onr6.x1ja2u2z > div";
             const element = await page.waitForSelector(select);
             const items_location = await page.evaluate(() => {
@@ -98,13 +97,12 @@ import { parse } from 'json2csv';
                 });
             });
 
-            const desc_selector = '.x78zum5 > div.xod5an3 div.x1gslohp';
-
             page.keyboard.down("Shift")
             page.keyboard.press("Tab")
             page.keyboard.up("Shift")
             page.keyboard.press("Enter")
-
+            
+            const desc_selector = '.x78zum5 > div.xod5an3 div.x1gslohp';
             const seeMoreXPath =
                 "//span[contains(text(),'See more')]/parent::div";
 
@@ -113,6 +111,9 @@ import { parse } from 'json2csv';
                 await seeMoreButton.click();
             }
 
+            await page.waitForSelector(desc_selector,{
+                timeout: 1200000
+            });
             let desc = await page.$eval(desc_selector, (data) => data.textContent.replace(/\n/g, ''));
             const description = seeMoreButton ? desc.substring(0, desc.length - 9) : desc;
 
@@ -133,7 +134,8 @@ import { parse } from 'json2csv';
             scrapped_data.push(items);
             console.log("For url", page.url(), " item is \n", items);
         } catch (error) {
-            console.log(error);
+            // console.log(error);
+            console.log("Error in scraping data for url:", page.url(), error);
             // continue;
 
         }
